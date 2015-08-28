@@ -3,6 +3,7 @@ package barcode
 import (
 	"image"
 	"image/color"
+	"os"
 )
 
 // Scan() scans for QR and Barcodes on the given image. Returns empty string and `nil`
@@ -25,4 +26,21 @@ func desaturate(img image.Image) *image.Gray {
 	}
 
 	return result
+}
+
+// ScanFile() decodes image data from the given file path and returns the result of
+// running Scan() on it.
+func ScanFile(path string) (string, error) {
+	file, e := os.Open(path)
+	if e != nil {
+		return "", e
+	}
+
+	defer file.Close()
+	img, _, e := image.Decode(file)
+	if e != nil {
+		return "", e
+	}
+
+	return Scan(img)
 }
