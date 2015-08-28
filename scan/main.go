@@ -5,9 +5,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/hyperworks/go-barcode"
 	_ "image/jpeg"
 	_ "image/png"
+
+	"github.com/hyperworks/go-barcode"
 )
 
 func main() {

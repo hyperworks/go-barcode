@@ -36,3 +36,9 @@ $ $GOPATH/bin/scan barcode.png
 processing barcode.png
 code: 9876543210128
 ```
+
+# FAQ
+
+* Error: `image: unknown format` - Adds a side-effect import for your image format such as
+  `import _ "image/gif"` or `import _ "image/bmp"`.
+

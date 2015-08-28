@@ -6,7 +6,10 @@ package barcode
 // #include <stdlib.h>
 // #include "bridge.h"
 import "C"
-import "unsafe"
+
+import (
+	"unsafe"
+)
 
 func scan(stride int, pixels []uint8) (string, error) {
 	result, e := C.scan(
