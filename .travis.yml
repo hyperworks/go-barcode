@@ -2,5 +2,4 @@ language: go
 before_install: ./build-zxing.sh
 go:
   - "1.5"
-  - release
   - tip
