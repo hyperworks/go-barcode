@@ -1,5 +1,5 @@
 language: go
-before_script: ./build-zxing.cpp
+before_install: ./build-zxing.cpp
 go:
   - "1.5"
   - "1.4"
