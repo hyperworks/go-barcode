@@ -1,5 +1,7 @@
 # GO-BARCODE
 
+[![Build Status](https://travis-ci.org/hyperworks/go-barcode.svg)](https://travis-ci.org/hyperworks/go-barcode)
+
 * [zxing-cpp](https://github.com/glassechidna/zxing-cpp)
 * [git-subtree](https://git-scm.com/book/en/v1/Git-Tools-Subtree-Merging)
 
