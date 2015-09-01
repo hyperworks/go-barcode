@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
+	"fmt"
 	"image"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,35 +19,57 @@ import (
 )
 
 func main() {
-	for _, arg := range os.Args[1:] {
-		if u, e := url.Parse(arg); e == nil && strings.HasPrefix(u.Scheme, "http") {
-			processURL(u)
-		} else {
-			processPath(arg)
+	jsonResult := false
+	flag.BoolVar(&jsonResult, "json", false, "output result as JSON instead of text.")
+	flag.Parse()
+
+	result := processArgs(flag.Args())
+	if jsonResult {
+		bytes, e := json.MarshalIndent(result, "", "  ")
+		noError(e)
+		os.Stdout.Write(bytes)
+
+	} else {
+		for key, codes := range result {
+			fmt.Println(key)
+			for _, code := range codes {
+				fmt.Println("\t" + code)
+			}
 		}
 	}
 }
 
-func processURL(u *url.URL) {
-	log.Printf("fetch: %s", u)
+func processArgs(items []string) map[string][]string {
+	result := map[string][]string{}
+
+	for _, item := range items {
+		if u, e := url.Parse(item); e == nil && strings.HasPrefix(u.Scheme, "http") {
+			result[item] = processURL(u)
+		} else {
+			result[item] = processPath(item)
+		}
+	}
+
+	return result
+}
+
+func processURL(u *url.URL) []string {
 	resp, e := http.Get(u.String())
 	noError(e)
 
 	defer resp.Body.Close()
-	process(resp.Body)
+	return process(resp.Body)
 }
 
-func processPath(path string) {
-	log.Printf("read: %s", path)
-
+func processPath(path string) []string {
 	file, e := os.Open(path)
 	noError(e)
-	defer file.Close()
 
-	process(file)
+	defer file.Close()
+	return process(file)
 }
 
-func process(reader io.Reader) {
+func process(reader io.Reader) []string {
 	img, _, e := image.Decode(reader)
 	noError(e)
 
@@ -53,14 +77,14 @@ func process(reader io.Reader) {
 	noError(e)
 
 	if result == "" {
-		log.Println("no code found.")
+		return []string{}
 	} else {
-		log.Println("code:", result)
+		return []string{result}
 	}
 }
 
 func noError(e error) {
 	if e != nil {
-		log.Fatal(e)
+		panic(e)
 	}
 }
