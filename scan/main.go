@@ -73,14 +73,9 @@ func process(reader io.Reader) []string {
 	img, _, e := image.Decode(reader)
 	noError(e)
 
-	result, e := barcode.Scan(img)
+	results, e := barcode.Scan(img)
 	noError(e)
-
-	if result == "" {
-		return []string{}
-	} else {
-		return []string{result}
-	}
+	return results
 }
 
 func noError(e error) {

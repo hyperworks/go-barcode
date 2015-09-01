@@ -11,18 +11,27 @@ import (
 	"unsafe"
 )
 
-func scan(stride int, pixels []uint8) (string, error) {
-	result, e := C.scan(
+func scan(stride int, pixels []uint8) ([]string, error) {
+	outputs := make([]*C.char, 8)
+	count, e := C.scan(
 		C.int(stride),
 		C.int(len(pixels)),
 		(*C.char)(unsafe.Pointer(&pixels[0])),
+		C.int(len(outputs)),
+		&outputs[0],
 	)
 
 	if e != nil {
-		return "", e
+		return nil, e
 	}
 
-	str := C.GoString(result)
-	C.free(unsafe.Pointer(result))
-	return str, nil
+	results := make([]string, 0, count)
+	for i := 0; i < int(count); i++ {
+		str := C.GoString(outputs[i])
+		results = append(results, str)
+
+		C.free(unsafe.Pointer(outputs[i]))
+	}
+
+	return results, nil
 }

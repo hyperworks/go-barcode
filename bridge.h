@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-  const char *scan(int, int, char*);
+  int scan(int, int, char *, int, char *[]);
 
 #ifdef __cplusplus
 };

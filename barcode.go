@@ -17,23 +17,23 @@ import (
 // Scan() scans for QR and Barcodes on the given image. Returns empty string and `nil`
 // error if no code is found.
 // TODO: Return ErrNoCode instead.
-func Scan(img image.Image) (string, error) {
+func Scan(img image.Image) ([]string, error) {
 	gray := desaturate(img)
 	return scan(gray.Stride, gray.Pix)
 }
 
 // ScanFile() decodes image data from the given file path and returns the result of
 // running Scan() on it.
-func ScanFile(path string) (string, error) {
+func ScanFile(path string) ([]string, error) {
 	file, e := os.Open(path)
 	if e != nil {
-		return "", e
+		return nil, e
 	}
 
 	defer file.Close()
 	img, _, e := image.Decode(file)
 	if e != nil {
-		return "", e
+		return nil, e
 	}
 
 	return Scan(img)

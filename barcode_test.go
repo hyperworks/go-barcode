@@ -15,11 +15,14 @@ const (
 
 // TODO: The library works pretty well, but our test image is much too simple/easy.
 func TestScan_BarcodePNG(t *testing.T) {
-	result, e := ScanFile(TestFile)
-	if e != nil {
+	results, e := ScanFile(TestFile)
+	switch {
+	case e != nil:
 		t.Error(e)
-	} else if result != TestCode {
-		t.Errorf("expected %#v, got %#v", TestCode, result)
+	case len(results) != 1:
+		t.Errorf("expected 1 result, got %d", len(results))
+	case results[0] != TestCode:
+		t.Errorf("expected %#v, got %#v", TestCode, results[0])
 	}
 }
 
