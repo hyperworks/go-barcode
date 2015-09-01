@@ -56,6 +56,11 @@ ArrayRef<char> GreyscaleLuminanceSource::getRow(int y, ArrayRef<char> row) const
   return row;
 }
 
+Ref<LuminanceSource> GreyscaleLuminanceSource::crop(int left, int top, int width, int height) const {
+  Ref<LuminanceSource> result(new GreyscaleLuminanceSource(greyData_, dataWidth_, dataHeight_, left, top, width, height));
+  return result;
+}
+
 ArrayRef<char> GreyscaleLuminanceSource::getMatrix() const {
   int size = getWidth() * getHeight();
   ArrayRef<char> result (size);
