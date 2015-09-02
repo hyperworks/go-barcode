@@ -56,8 +56,12 @@ func processArgs(items []string) map[string][]string {
 func processURL(u *url.URL) []string {
 	resp, e := http.Get(u.String())
 	noError(e)
-
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil
+	}
+
 	return process(resp.Body)
 }
 
