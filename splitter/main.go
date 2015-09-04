@@ -71,8 +71,6 @@ func processFile(file string) []string {
 		}
 	}
 
-	fmt.Println("number of pages:", pagesCount)
-
 	// save converted image files
 	infiles := make([]string, pagesCount)
 	outfiles := make([]string, pagesCount)
@@ -84,11 +82,12 @@ func processFile(file string) []string {
 		pngfiles[i] = filepath.Join(outdir, "page-"+pageNum+".png")
 	}
 
+	must(mw.SetOption("density", "100")) // before reading
+	must(mw.SetCompressionQuality(100))
+	must(mw.SetImageCompressionQuality(100))
+
 	for i, infile := range infiles {
 		must(mw.ReadImage(infile))
-		must(mw.SetCompressionQuality(100))
-		must(mw.SetImageCompressionQuality(100))
-
 		must(mw.SetImageFormat("pdf"))
 		must(mw.WriteImage(outfiles[i]))
 		must(mw.SetImageFormat("png"))
