@@ -82,16 +82,19 @@ func processFile(file string) []string {
 		pngfiles[i] = filepath.Join(outdir, "page-"+pageNum+".png")
 	}
 
-	must(mw.SetOption("density", "100")) // before reading
-	must(mw.SetCompressionQuality(100))
-	must(mw.SetImageCompressionQuality(100))
+	// set density before reading, so PDF are read in higher density and don't cause blurry
+	// images when exporting. (imagick conversion can be lossy.)
+	must(mw.SetOption("density", "200"))
 
 	for i, infile := range infiles {
 		must(mw.ReadImage(infile))
 		must(mw.SetImageFormat("pdf"))
 		must(mw.WriteImage(outfiles[i]))
-		must(mw.SetImageFormat("png"))
-		must(mw.WriteImage(pngfiles[i]))
+
+		if config.writesPNG {
+			must(mw.SetImageFormat("png"))
+			must(mw.WriteImage(pngfiles[i]))
+		}
 	}
 
 	// accumulate results
