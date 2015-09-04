@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 
 	"github.com/gographics/imagick/imagick"
 )
@@ -44,18 +46,48 @@ func main() {
 }
 
 func processFile(file string) []string {
+	sceneRE := regexp.MustCompile(`Scene: \d+ of (\d+)`)
+
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
+	// calculate output path.
 	outdir, e := ioutil.TempDir("", filepath.Base(file))
 	must(e)
 
-	outfile := filepath.Join(outdir, "output.png")
-
 	must(mw.ReadImage(file))
-	must(mw.SetImageFormat("png"))
-	must(mw.WriteImages(outfile, true))
 
+	// extract image metadata
+	info := mw.IdentifyImage()
+	matches := sceneRE.FindStringSubmatch(info)
+	pagesCount := 0
+	if len(matches) > 1 {
+		if n, e := strconv.ParseInt(matches[1], 10, 32); e != nil {
+			must(e)
+		} else {
+			pagesCount = int(n)
+		}
+	}
+
+	fmt.Println("number of pages:", pagesCount)
+
+	// save converted image files
+	infiles := make([]string, pagesCount)
+	outfiles := make([]string, pagesCount)
+	for i := range outfiles {
+		infiles[i] = file + "[" + strconv.FormatInt(int64(i), 10) + "]"
+		outfiles[i] = filepath.Join(outdir, "page-"+strconv.FormatInt(int64(i), 10)+".pdf")
+	}
+
+	for i, infile := range infiles {
+		must(mw.ReadImage(infile))
+		must(mw.SetImageFormat("pdf"))
+		must(mw.SetCompressionQuality(100))
+		must(mw.SetImageCompressionQuality(100))
+		must(mw.WriteImage(outfiles[i]))
+	}
+
+	// check results
 	children, e := ioutil.ReadDir(outdir)
 	must(e)
 
