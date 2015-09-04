@@ -14,7 +14,8 @@ import (
 )
 
 var config = struct {
-	json bool
+	json      bool
+	writesPNG bool
 }{}
 
 func main() {
@@ -22,6 +23,7 @@ func main() {
 	defer imagick.Terminate()
 
 	flag.BoolVar(&config.json, "json", false, "output valid JSON instead of plain text.")
+	flag.BoolVar(&config.writesPNG, "png", false, "also output PNG images of each page.")
 	flag.Parse()
 
 	result := map[string][]string{}
@@ -30,7 +32,7 @@ func main() {
 	}
 
 	if config.json {
-		bytes, e := json.Marshal(result)
+		bytes, e := json.MarshalIndent(result, "", "  ")
 		must(e)
 		os.Stdout.Write(bytes)
 
@@ -74,20 +76,26 @@ func processFile(file string) []string {
 	// save converted image files
 	infiles := make([]string, pagesCount)
 	outfiles := make([]string, pagesCount)
+	pngfiles := make([]string, pagesCount)
 	for i := range outfiles {
-		infiles[i] = file + "[" + strconv.FormatInt(int64(i), 10) + "]"
-		outfiles[i] = filepath.Join(outdir, "page-"+strconv.FormatInt(int64(i), 10)+".pdf")
+		pageNum := strconv.FormatInt(int64(i), 10)
+		infiles[i] = file + "[" + pageNum + "]"
+		outfiles[i] = filepath.Join(outdir, "page-"+pageNum+".pdf")
+		pngfiles[i] = filepath.Join(outdir, "page-"+pageNum+".png")
 	}
 
 	for i, infile := range infiles {
 		must(mw.ReadImage(infile))
-		must(mw.SetImageFormat("pdf"))
 		must(mw.SetCompressionQuality(100))
 		must(mw.SetImageCompressionQuality(100))
+
+		must(mw.SetImageFormat("pdf"))
 		must(mw.WriteImage(outfiles[i]))
+		must(mw.SetImageFormat("png"))
+		must(mw.WriteImage(pngfiles[i]))
 	}
 
-	// check results
+	// accumulate results
 	children, e := ioutil.ReadDir(outdir)
 	must(e)
 
