@@ -34,9 +34,13 @@ To use this from the CLI, run `go install` on the CLI package:
 
 ```sh
 $ go install github.com/hyperworks/go-barcode/scan
+$ go install github.com/hyperworks/go-barcode/pngize
+$ $GOPATH/bin/pngize barcode.pdf
+barcode.pdf
+  /var/folders/lb/d7m0fh9j58zby9l0nhznl7dr0000gn/T/barcode.pdf601205962/output.png
 $ $GOPATH/bin/scan barcode.png
-processing barcode.png
-code: 9876543210128
+barcode.png
+  9876543210128
 ```
 
 # FAQ
