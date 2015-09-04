@@ -30,7 +30,11 @@ extern "C" {
     MultiFormatReader reader;
     Ref<multi::GenericMultipleBarcodeReader> multiReader(new multi::GenericMultipleBarcodeReader(reader));
     try {
-      vector< Ref<Result> > results = multiReader->decodeMultiple(bmp, DecodeHints::TRYHARDER_HINT);
+      // if our image is at a good resolution, we do not need the TRYHARDER_HINT which can
+      // slowdown scanning by atleast an order of magnitude.
+      // TODO: boolean flag for toggling this?
+      /* vector< Ref<Result> > results = multiReader->decodeMultiple(bmp, DecodeHints::TRYHARDER_HINT); */
+      vector< Ref<Result> > results = multiReader->decodeMultiple(bmp, 0);
 
       int idx = 0;
       for (vector< Ref<Result> >::iterator it = results.begin();
