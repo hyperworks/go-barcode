@@ -11,9 +11,10 @@ import (
 	"unsafe"
 )
 
-func scan(stride int, pixels []uint8) ([]string, error) {
+func scan(tryhard bool, stride int, pixels []uint8) ([]string, error) {
 	outputs := make([]*C.char, 8)
 	count, e := C.scan(
+		C.bool(tryhard),
 		C.int(stride),
 		C.int(len(pixels)),
 		(*C.char)(unsafe.Pointer(&pixels[0])),

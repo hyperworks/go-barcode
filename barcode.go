@@ -19,7 +19,14 @@ import (
 // TODO: Return ErrNoCode instead.
 func Scan(img image.Image) ([]string, error) {
 	gray := desaturate(img)
-	return scan(gray.Stride, gray.Pix)
+	return scan(false, gray.Stride, gray.Pix)
+}
+
+// ScanHarder() is like Scan() but invokes the scanner with TRYHARDER_HINT which makes
+// scanning significantly slower but may be able scan more lower quality images.
+func ScanHarder(img image.Image) ([]string, error) {
+	gray := desaturate(img)
+	return scan(true, gray.Stride, gray.Pix)
 }
 
 // ScanFile() decodes image data from the given file path and returns the result of

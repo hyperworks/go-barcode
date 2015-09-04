@@ -17,7 +17,7 @@ using namespace zxing;
 
 extern "C" {
 
-  int scan(int stride, int npixels, char *pixels, int maxoutput, char *outputs[]) {
+  int scan(bool tryhard, int stride, int npixels, char *pixels, int maxoutput, char *outputs[]) {
     int height = npixels / stride;
 
     // creates binary bitmap from our gray pixels
@@ -32,9 +32,8 @@ extern "C" {
     try {
       // if our image is at a good resolution, we do not need the TRYHARDER_HINT which can
       // slowdown scanning by atleast an order of magnitude.
-      // TODO: boolean flag for toggling this?
-      /* vector< Ref<Result> > results = multiReader->decodeMultiple(bmp, DecodeHints::TRYHARDER_HINT); */
-      vector< Ref<Result> > results = multiReader->decodeMultiple(bmp, 0);
+      vector< Ref<Result> > results = multiReader->decodeMultiple(bmp,
+          tryhard ? DecodeHints::TRYHARDER_HINT : 0);
 
       int idx = 0;
       for (vector< Ref<Result> >::iterator it = results.begin();
