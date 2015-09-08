@@ -62,7 +62,7 @@ func processFile(file string) []string {
 	// extract image metadata
 	info := mw.IdentifyImage()
 	matches := sceneRE.FindStringSubmatch(info)
-	pagesCount := 0
+	pagesCount := 1
 	if len(matches) > 1 {
 		if n, e := strconv.ParseInt(matches[1], 10, 32); e != nil {
 			must(e)
@@ -84,7 +84,7 @@ func processFile(file string) []string {
 
 	// set density before reading, so PDF are read in higher density and don't cause blurry
 	// images when exporting. (imagick conversion can be lossy.)
-	must(mw.SetOption("density", "200"))
+	must(mw.SetOption("density", "300"))
 
 	for i, infile := range infiles {
 		must(mw.ReadImage(infile))
