@@ -7,6 +7,6 @@ cd zxing-cpp
 mkdir -p build/
 cd build
 
-cmake -G "Unix Makefiles" ..
+cmake -DCMAKE_BUILD_TYPE=RELEASE -G "Unix Makefiles" ..
 make libzxing/fast
 popd
