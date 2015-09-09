@@ -40,14 +40,31 @@ func main() {
 }
 
 func processArgs(items []string) map[string][]string {
-	result := map[string][]string{}
+	type scanResult struct {
+		key   string
+		codes []string
+	}
+
+	results := make(chan *scanResult)
+	defer close(results)
 
 	for _, item := range items {
-		if u, e := url.Parse(item); e == nil && strings.HasPrefix(u.Scheme, "http") {
-			result[item] = processURL(u)
-		} else {
-			result[item] = processPath(item)
-		}
+		go func(key string) {
+			var codes []string
+			if u, e := url.Parse(item); e == nil && strings.HasPrefix(u.Scheme, "http") {
+				codes = processURL(u)
+			} else {
+				codes = processPath(key)
+			}
+
+			results <- &scanResult{key, codes}
+		}(item)
+	}
+
+	result := map[string][]string{}
+	for _ = range items {
+		scanned := <-results
+		result[scanned.key] = scanned.codes
 	}
 
 	return result
