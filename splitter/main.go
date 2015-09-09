@@ -7,8 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strconv"
 
 	"github.com/gographics/imagick/imagick"
 )
@@ -44,57 +42,31 @@ func main() {
 			}
 		}
 	}
-	/*func TempDir(dir, prefix string) (name string, err error)*/
 }
 
 func processFile(file string) []string {
-	sceneRE := regexp.MustCompile(`Scene: \d+ of (\d+)`)
-
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
 
-	// calculate output path.
 	outdir, e := ioutil.TempDir("", filepath.Base(file))
 	must(e)
 
-	must(mw.ReadImage(file))
-
-	// extract image metadata
-	info := mw.IdentifyImage()
-	matches := sceneRE.FindStringSubmatch(info)
-	pagesCount := 1
-	if len(matches) > 1 {
-		if n, e := strconv.ParseInt(matches[1], 10, 32); e != nil {
-			must(e)
-		} else {
-			pagesCount = int(n)
-		}
-	}
-
-	// save converted image files
-	infiles := make([]string, pagesCount)
-	outfiles := make([]string, pagesCount)
-	pngfiles := make([]string, pagesCount)
-	for i := range outfiles {
-		pageNum := strconv.FormatInt(int64(i), 10)
-		infiles[i] = file + "[" + pageNum + "]"
-		outfiles[i] = filepath.Join(outdir, "page-"+pageNum+".pdf")
-		pngfiles[i] = filepath.Join(outdir, "page-"+pageNum+".png")
-	}
-
 	// set density before reading, so PDF are read in higher density and don't cause blurry
 	// images when exporting. (imagick conversion can be lossy.)
-	must(mw.SetOption("density", "300"))
+	must(mw.SetOption("density", "196"))
+	must(mw.SetOption("resample", "72"))
 
-	for i, infile := range infiles {
-		must(mw.ReadImage(infile))
-		must(mw.SetImageFormat("pdf"))
-		must(mw.WriteImage(outfiles[i]))
+	// split and export files
+	must(mw.ReadImage(file))
+	must(mw.SetCompressionQuality(100))
+	must(mw.SetImageCompressionQuality(100))
 
-		if config.writesPNG {
-			must(mw.SetImageFormat("png"))
-			must(mw.WriteImage(pngfiles[i]))
-		}
+	must(mw.SetImageFormat("pdf"))
+	must(mw.WriteImages(filepath.Join(outdir, "page.pdf"), false))
+
+	if config.writesPNG {
+		must(mw.SetImageFormat("png"))
+		must(mw.WriteImages(filepath.Join(outdir, "page.png"), false))
 	}
 
 	// accumulate results
